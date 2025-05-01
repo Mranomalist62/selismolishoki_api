@@ -30,4 +30,49 @@ class Ulasans extends Model
 
     // Enable timestamps, so 'created_at' and 'updated_at' will be automatically handled
     public $timestamps = true;
+
+    public function createUlasan(array $data): Ulasans
+    {
+        return Ulasans::create([
+            'nama'   => $data['nama'],
+            'ulasan' => $data['ulasan'],
+            'rating' => $data['rating'] ?? 0, // use 0 if rating not provided
+        ]);
+    }
+
+    public function getAllUlasans()
+    {
+        return Ulasans::all();
+    }
+
+    public function getUlasanById(int $id)
+    {
+        return Ulasans::find($id);
+    }
+
+    public function updateUlasan(int $id, array $data): bool
+    {
+        $ulasan = Ulasans::find($id);
+        if (!$ulasan) {
+            return false;
+        }
+
+        return $ulasan->update([
+            'nama'   => $data['nama'] ?? $ulasan->nama,
+            'ulasan' => $data['ulasan'] ?? $ulasan->ulasan,
+            'rating' => $data['rating'] ?? $ulasan->rating,
+        ]);
+    }
+
+    public function deleteUlasan(int $id): bool
+    {
+        $ulasan = Ulasans::find($id);
+        if (!$ulasan) {
+            return false;
+        }
+
+        return $ulasan->delete();
+    }
+
+
 }

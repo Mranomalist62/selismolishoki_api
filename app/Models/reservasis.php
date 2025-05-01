@@ -20,6 +20,8 @@ class Reservasis extends Model
         'servis',
         'namaLengkap',
         'alamatLengkap',
+        'latitude',
+        'longitude',
         'noTelp',
         'idJenisKerusakan',
         'deskripsi',
@@ -48,5 +50,33 @@ class Reservasis extends Model
     public function riwayats()
     {
         return $this->hasMany(Riwayats::class, 'idReservasi');
+    }
+
+    public function createReservasi(array $data): Reservasis
+    {
+        return Reservasis::create([
+            'servis'           => $data['servis'],
+            'namaLengkap'      => $data['namaLengkap'],
+            'alamatLengkap'    => $data['alamatLengkap'],
+            'latitude'         => $data['latitude'] ?? null,
+            'longitude'        => $data['longitude'] ?? null,
+            'noTelp'           => $data['noTelp'],
+            'idJenisKerusakan' => $data['idJenisKerusakan'],
+            'deskripsi'        => $data['deskripsi'],
+            'gambar'           => $data['gambar'] ?? null,
+            'video'            => $data['video'] ?? null,
+            'noResi'           => $data['noResi'] ?? null,
+            'status'           => $data['status'] ?? 'pending',
+        ]);
+    }
+
+    public function deleteReservasi(int $id): bool
+    {
+        $reservasi = Reservasis::find($id);
+        if (!$reservasi) {
+            return false;
+        }
+
+        return $reservasi->delete();
     }
 }

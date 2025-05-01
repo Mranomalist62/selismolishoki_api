@@ -35,4 +35,55 @@ class Riwayats extends Model
     {
         return $this->belongsTo(Reservasis::class, 'idReservasi');
     }
+
+    // Create
+    public function createRiwayat(array $data): Riwayats
+    {
+        return self::create([
+            'idReservasi' => $data['idReservasi'],
+            'status' => $data['status'] ?? 'pending', // Default if not set
+        ]);
+    }
+
+    // Read all
+    public function getAllRiwayats()
+    {
+        return self::with('reservasi')->get();
+    }
+
+    // Read by ID
+    public function getRiwayatById(int $id)
+    {
+        return self::with('reservasi')->find($id);
+    }
+
+    // Update
+    public function updateRiwayat(int $id, array $data): bool
+    {
+        $riwayat = self::find($id);
+        if (!$riwayat) {
+            return false;
+        }
+
+        return $riwayat->update([
+            'idReservasi' => $data['idReservasi'] ?? $riwayat->idReservasi,
+            'status' => $data['status'] ?? $riwayat->status,
+        ]);
+    }
+
+    //delete
+    public function deleteRiwayat(int $id): bool
+    {
+        $riwayat = self::find($id);
+        if (!$riwayat) {
+            return false;
+        }
+
+        return $riwayat->delete();
+    }
+
+
+
+
+
 }
