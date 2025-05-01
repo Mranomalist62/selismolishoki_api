@@ -91,7 +91,7 @@ class ReservasiController extends Controller
             'servis' => 'required|string|max:255',
             'namaLengkap' => 'required|string|max:255',
             'alamatLengkap' => 'required|string',
-            'noTelp' => 'required|string|max:20',
+            'noTelp' => 'required|string|max:16',
             'idJenisKerusakan' => 'required|exists:jenis_kerusakans,id',
             'deskripsi' => 'required|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
