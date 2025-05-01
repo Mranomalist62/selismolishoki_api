@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Data_Pelanggans extends Model
 {
@@ -13,7 +14,7 @@ class Data_Pelanggans extends Model
 
     protected $primaryKey = 'id';
 
-    public $timestamps = true; // Using created_at and updated_at timestamps
+    public $timestamps = true;
 
     protected $fillable = [
         'kode',
@@ -25,19 +26,46 @@ class Data_Pelanggans extends Model
         'updated_at',
     ];
 
-    /**
-     * Get the timestamp for the record creation.
-     */
     public function getCreatedAtAttribute($value)
     {
-        return \Carbon\Carbon::parse($value);
+        return Carbon::parse($value);
     }
 
-    /**
-     * Get the timestamp for the last update.
-     */
     public function getUpdatedAtAttribute($value)
     {
-        return \Carbon\Carbon::parse($value);
+        return Carbon::parse($value);
+    }
+
+    // CREATE
+    public static function createPelanggan(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllPelanggan()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getPelangganById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updatePelanggan($id, array $data)
+    {
+        $pelanggan = self::findOrFail($id);
+        $pelanggan->update($data);
+        return $pelanggan;
+    }
+
+    // DELETE
+    public static function deletePelanggan($id)
+    {
+        $pelanggan = self::findOrFail($id);
+        return $pelanggan->delete();
     }
 }

@@ -9,13 +9,10 @@ class Reservasis extends Model
 {
     use HasFactory;
 
-    // Explicitly set the table name as 'reservasis'
     protected $table = 'reservasis';
 
-    // Define the primary key if it's different from 'id'
     protected $primaryKey = 'id';
 
-    // Specify which attributes are mass assignable
     protected $fillable = [
         'servis',
         'namaLengkap',
@@ -29,24 +26,53 @@ class Reservasis extends Model
         'status',
     ];
 
-    // Define which attributes should be cast to specific types
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Enable timestamps, so 'created_at' and 'updated_at' will be automatically handled
     public $timestamps = true;
 
-    // Define the relationship to the JenisKerusakan model
     public function jenisKerusakan()
     {
         return $this->belongsTo(Jenis_kerusakans::class, 'idJenisKerusakan');
     }
 
-    // Define the relationship to the Riwayat model (optional, if needed)
     public function riwayats()
     {
         return $this->hasMany(Riwayats::class, 'idReservasi');
+    }
+
+    // CREATE
+    public static function createReservasi(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllReservasi()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getReservasiById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateReservasi($id, array $data)
+    {
+        $reservasi = self::findOrFail($id);
+        $reservasi->update($data);
+        return $reservasi;
+    }
+
+    // DELETE
+    public static function deleteReservasi($id)
+    {
+        $reservasi = self::findOrFail($id);
+        return $reservasi->delete();
     }
 }

@@ -9,25 +9,61 @@ class Ulasans extends Model
 {
     use HasFactory;
 
-    // Explicitly set the table name as 'ulasans'
     protected $table = 'ulasans';
 
-    // Define the primary key if it's different from 'id'
     protected $primaryKey = 'id';
 
-    // Specify which attributes are mass assignable
     protected $fillable = [
         'nama',
         'ulasan',
         'rating',
     ];
 
-    // Define which attributes should be cast to specific types
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Enable timestamps, so 'created_at' and 'updated_at' will be automatically handled
     public $timestamps = true;
+
+    // CREATE
+    public static function createUlasan(array $data)
+    {
+        return self::create([
+            'nama'   => $data['nama'],
+            'ulasan' => $data['ulasan'],
+            'rating' => $data['rating'],
+        ]);
+    }
+
+    // READ - All
+    public static function getAllUlasans()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getUlasanById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateUlasan($id, array $data)
+    {
+        $ulasan = self::findOrFail($id);
+        $ulasan->update([
+            'nama'   => $data['nama'] ?? $ulasan->nama,
+            'ulasan' => $data['ulasan'] ?? $ulasan->ulasan,
+            'rating' => $data['rating'] ?? $ulasan->rating,
+        ]);
+        return $ulasan;
+    }
+
+    // DELETE
+    public static function deleteUlasan($id)
+    {
+        $ulasan = self::findOrFail($id);
+        return $ulasan->delete();
+    }
 }

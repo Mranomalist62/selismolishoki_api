@@ -24,8 +24,6 @@ class Jobs extends Model
 
     /**
      * Get the timestamp for when the job is reserved.
-     *
-     * @return \Illuminate\Support\Carbon|null
      */
     public function reservedAt()
     {
@@ -34,8 +32,6 @@ class Jobs extends Model
 
     /**
      * Get the timestamp for when the job is available.
-     *
-     * @return \Illuminate\Support\Carbon
      */
     public function availableAt()
     {
@@ -44,11 +40,42 @@ class Jobs extends Model
 
     /**
      * Get the timestamp for when the job was created.
-     *
-     * @return \Illuminate\Support\Carbon
      */
     public function createdAt()
     {
         return $this->asDateTime($this->created_at);
+    }
+
+    // CREATE
+    public static function createJob(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllJobs()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getJobById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateJob($id, array $data)
+    {
+        $job = self::findOrFail($id);
+        $job->update($data);
+        return $job;
+    }
+
+    // DELETE
+    public static function deleteJob($id)
+    {
+        $job = self::findOrFail($id);
+        return $job->delete();
     }
 }

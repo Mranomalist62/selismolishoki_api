@@ -9,30 +9,63 @@ class Riwayats extends Model
 {
     use HasFactory;
 
-    // Explicitly set the table name as 'riwayats'
     protected $table = 'riwayats';
 
-    // Define the primary key if it's different from 'id'
     protected $primaryKey = 'id';
 
-    // Specify which attributes are mass assignable
     protected $fillable = [
         'idReservasi',
         'status',
     ];
 
-    // Define which attributes should be cast to specific types
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Enable timestamps, so 'created_at' and 'updated_at' will be automatically handled
     public $timestamps = true;
 
-    // Define the relationship to the Reservasi model
     public function reservasi()
     {
         return $this->belongsTo(Reservasis::class, 'idReservasi');
+    }
+
+    // CREATE
+    public static function createRiwayat(array $data)
+    {
+        return self::create([
+            'idReservasi' => $data['idReservasi'],
+            'status'      => $data['status'],
+        ]);
+    }
+
+    // READ - All
+    public static function getAllRiwayat()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getRiwayatById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateRiwayat($id, array $data)
+    {
+        $riwayat = self::findOrFail($id);
+        $riwayat->update([
+            'idReservasi' => $data['idReservasi'] ?? $riwayat->idReservasi,
+            'status'      => $data['status'] ?? $riwayat->status,
+        ]);
+        return $riwayat;
+    }
+
+    // DELETE
+    public static function deleteRiwayat($id)
+    {
+        $riwayat = self::findOrFail($id);
+        return $riwayat->delete();
     }
 }
