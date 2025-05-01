@@ -34,7 +34,7 @@ class DataPelangganController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'noHP' => 'required|string|max:20',
+            'noHP' => 'required|string|max:16',
             'alamat' => 'required|string',
             'keluhan' => 'required|string',
         ]);
@@ -71,7 +71,7 @@ class DataPelangganController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'noHP' => 'required|string|max:20',
+            'noHP' => 'required|string|max:16',
             'alamat' => 'required|string',
             'keluhan' => 'required|string',
         ]);
