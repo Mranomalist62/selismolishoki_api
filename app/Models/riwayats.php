@@ -30,42 +30,54 @@ class Riwayats extends Model
         return $this->belongsTo(Reservasis::class, 'idReservasi');
     }
 
-    // CREATE
-    public static function createRiwayat(array $data)
+    // Create
+    public function createRiwayat(array $data): Riwayats
     {
         return self::create([
             'idReservasi' => $data['idReservasi'],
-            'status'      => $data['status'],
+            'status' => $data['status'] ?? 'pending', // Default if not set
         ]);
     }
 
-    // READ - All
-    public static function getAllRiwayat()
+    // Read all
+    public function getAllRiwayats()
     {
-        return self::all();
+        return self::with('reservasi')->get();
     }
 
-    // READ - By ID
-    public static function getRiwayatById($id)
+    // Read by ID
+    public function getRiwayatById(int $id)
     {
-        return self::find($id);
+        return self::with('reservasi')->find($id);
     }
 
-    // UPDATE
-    public static function updateRiwayat($id, array $data)
+    // Update
+    public function updateRiwayat(int $id, array $data): bool
     {
-        $riwayat = self::findOrFail($id);
-        $riwayat->update([
+        $riwayat = self::find($id);
+        if (!$riwayat) {
+            return false;
+        }
+
+        return $riwayat->update([
             'idReservasi' => $data['idReservasi'] ?? $riwayat->idReservasi,
-            'status'      => $data['status'] ?? $riwayat->status,
+            'status' => $data['status'] ?? $riwayat->status,
         ]);
-        return $riwayat;
     }
 
-    // DELETE
-    public static function deleteRiwayat($id)
+    //delete
+    public function deleteRiwayat(int $id): bool
     {
-        $riwayat = self::findOrFail($id);
+        $riwayat = self::find($id);
+        if (!$riwayat) {
+            return false;
+        }
+
         return $riwayat->delete();
     }
+
+
+
+
+
 }

@@ -17,6 +17,8 @@ class Reservasis extends Model
         'servis',
         'namaLengkap',
         'alamatLengkap',
+        'latitude',
+        'longitude',
         'noTelp',
         'idJenisKerusakan',
         'deskripsi',
@@ -43,36 +45,31 @@ class Reservasis extends Model
         return $this->hasMany(Riwayats::class, 'idReservasi');
     }
 
-    // CREATE
-    public static function createReservasi(array $data)
+    public function createReservasi(array $data): Reservasis
     {
-        return self::create($data);
+        return Reservasis::create([
+            'servis'           => $data['servis'],
+            'namaLengkap'      => $data['namaLengkap'],
+            'alamatLengkap'    => $data['alamatLengkap'],
+            'latitude'         => $data['latitude'] ?? null,
+            'longitude'        => $data['longitude'] ?? null,
+            'noTelp'           => $data['noTelp'],
+            'idJenisKerusakan' => $data['idJenisKerusakan'],
+            'deskripsi'        => $data['deskripsi'],
+            'gambar'           => $data['gambar'] ?? null,
+            'video'            => $data['video'] ?? null,
+            'noResi'           => $data['noResi'] ?? null,
+            'status'           => $data['status'] ?? 'pending',
+        ]);
     }
 
-    // READ - All
-    public static function getAllReservasi()
+    public function deleteReservasi(int $id): bool
     {
-        return self::all();
-    }
+        $reservasi = Reservasis::find($id);
+        if (!$reservasi) {
+            return false;
+        }
 
-    // READ - By ID
-    public static function getReservasiById($id)
-    {
-        return self::find($id);
-    }
-
-    // UPDATE
-    public static function updateReservasi($id, array $data)
-    {
-        $reservasi = self::findOrFail($id);
-        $reservasi->update($data);
-        return $reservasi;
-    }
-
-    // DELETE
-    public static function deleteReservasi($id)
-    {
-        $reservasi = self::findOrFail($id);
         return $reservasi->delete();
     }
 }

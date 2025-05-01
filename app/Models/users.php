@@ -70,3 +70,4 @@ class Users extends Model
         return $user->delete();
     }
 }
+

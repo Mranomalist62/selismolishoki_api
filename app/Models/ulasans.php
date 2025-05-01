@@ -26,44 +26,48 @@ class Ulasans extends Model
 
     public $timestamps = true;
 
-    // CREATE
-    public static function createUlasan(array $data)
+    public function createUlasan(array $data): Ulasans
     {
-        return self::create([
+        return Ulasans::create([
             'nama'   => $data['nama'],
             'ulasan' => $data['ulasan'],
-            'rating' => $data['rating'],
+            'rating' => $data['rating'] ?? 0, // use 0 if rating not provided
         ]);
     }
 
-    // READ - All
-    public static function getAllUlasans()
+    public function getAllUlasans()
     {
-        return self::all();
+        return Ulasans::all();
     }
 
-    // READ - By ID
-    public static function getUlasanById($id)
+    public function getUlasanById(int $id)
     {
-        return self::find($id);
+        return Ulasans::find($id);
     }
 
-    // UPDATE
-    public static function updateUlasan($id, array $data)
+    public function updateUlasan(int $id, array $data): bool
     {
-        $ulasan = self::findOrFail($id);
-        $ulasan->update([
+        $ulasan = Ulasans::find($id);
+        if (!$ulasan) {
+            return false;
+        }
+
+        return $ulasan->update([
             'nama'   => $data['nama'] ?? $ulasan->nama,
             'ulasan' => $data['ulasan'] ?? $ulasan->ulasan,
             'rating' => $data['rating'] ?? $ulasan->rating,
         ]);
-        return $ulasan;
     }
 
-    // DELETE
-    public static function deleteUlasan($id)
+    public function deleteUlasan(int $id): bool
     {
-        $ulasan = self::findOrFail($id);
+        $ulasan = Ulasans::find($id);
+        if (!$ulasan) {
+            return false;
+        }
+
         return $ulasan->delete();
     }
+
+
 }
