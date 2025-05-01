@@ -22,13 +22,43 @@ class Jadwals extends Model
         'updated_at',
     ];
 
-    public $timestamps = true; // Laravel will automatically handle 'created_at' and 'updated_at'
+    public $timestamps = true;
 
-    /**
-     * Get the related reservation for the jadwal.
-     */
     public function reservasi()
     {
         return $this->belongsTo(Reservasis::class, 'idReservasi');
+    }
+
+    // CREATE
+    public static function createJadwal(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllJadwals()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getJadwalById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateJadwal($id, array $data)
+    {
+        $jadwal = self::findOrFail($id);
+        $jadwal->update($data);
+        return $jadwal;
+    }
+
+    // DELETE
+    public static function deleteJadwal($id)
+    {
+        $jadwal = self::findOrFail($id);
+        return $jadwal->delete();
     }
 }

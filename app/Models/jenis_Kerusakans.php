@@ -19,12 +19,10 @@ class Jenis_kerusakans extends Model
         'updated_at',
     ];
 
-    public $timestamps = true; // Laravel will automatically handle 'created_at' and 'updated_at'
+    public $timestamps = true;
 
     /**
      * Get the timestamp for when the entry was created.
-     *
-     * @return \Illuminate\Support\Carbon
      */
     public function createdAt()
     {
@@ -33,11 +31,42 @@ class Jenis_kerusakans extends Model
 
     /**
      * Get the timestamp for when the entry was updated.
-     *
-     * @return \Illuminate\Support\Carbon
      */
     public function updatedAt()
     {
         return $this->asDateTime($this->updated_at);
+    }
+
+    // CREATE
+    public static function createJenisKerusakan(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllJenisKerusakan()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getJenisKerusakanById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateJenisKerusakan($id, array $data)
+    {
+        $jenis = self::findOrFail($id);
+        $jenis->update($data);
+        return $jenis;
+    }
+
+    // DELETE
+    public static function deleteJenisKerusakan($id)
+    {
+        $jenis = self::findOrFail($id);
+        return $jenis->delete();
     }
 }

@@ -27,33 +27,51 @@ class Job_batches extends Model
 
     public $timestamps = false;
 
-    /**
-     * Get the timestamp for when the job batch was created.
-     *
-     * @return \Illuminate\Support\Carbon
-     */
     public function createdAt()
     {
         return $this->asDateTime($this->created_at);
     }
 
-    /**
-     * Get the timestamp for when the job batch finished.
-     *
-     * @return \Illuminate\Support\Carbon|null
-     */
     public function finishedAt()
     {
         return $this->finished_at ? $this->asDateTime($this->finished_at) : null;
     }
 
-    /**
-     * Get the timestamp for when the job batch was cancelled.
-     *
-     * @return \Illuminate\Support\Carbon|null
-     */
     public function cancelledAt()
     {
         return $this->cancelled_at ? $this->asDateTime($this->cancelled_at) : null;
+    }
+
+    // CREATE
+    public static function createJobBatch(array $data)
+    {
+        return self::create($data);
+    }
+
+    // READ - All
+    public static function getAllJobBatches()
+    {
+        return self::all();
+    }
+
+    // READ - By ID
+    public static function getJobBatchById($id)
+    {
+        return self::find($id);
+    }
+
+    // UPDATE
+    public static function updateJobBatch($id, array $data)
+    {
+        $batch = self::findOrFail($id);
+        $batch->update($data);
+        return $batch;
+    }
+
+    // DELETE
+    public static function deleteJobBatch($id)
+    {
+        $batch = self::findOrFail($id);
+        return $batch->delete();
     }
 }
