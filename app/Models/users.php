@@ -30,4 +30,43 @@ class Users extends Model
 
     // Optionally disable timestamps if you don't want Eloquent to manage created_at and updated_at automatically
     public $timestamps = true;
+
+    public static function createUser(array $data) {
+    return self::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => bcrypt($data['password']), // Always hash passwords
+        'remember_token' => $data['remember_token'] ?? null,
+    ]);
+}
+
+    public static function getUserById($id)
+    {
+        return self::find($id);
+    }
+
+    public static function getAllUsers()
+    {
+        return self::all();
+    }
+
+    public static function updateUser($id, array $data)
+    {
+    $user = self::findOrFail($id);
+    $user->update([
+        'name' => $data['name'] ?? $user->name,
+        'email' => $data['email'] ?? $user->email,
+        'password' => isset($data['password']) ? bcrypt($data['password']) : $user->password,
+        'remember_token' => $data['remember_token'] ?? $user->remember_token,
+    ]);
+
+    return $user;
+    }
+
+
+    public static function deleteUser($id)
+    {
+        $user = self::findOrFail($id);
+        return $user->delete();
+    }
 }
