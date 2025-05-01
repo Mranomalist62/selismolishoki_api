@@ -39,11 +39,11 @@ class ReservasiController extends Controller
             'servis' => 'required|string|max:255',
             'namaLengkap' => 'required|string|max:255',
             'alamatLengkap' => 'required|string',
-            'noTelp' => 'required|string|max:20',
+            'noTelp' => 'required|string|max:16',
             'idJenisKerusakan' => 'required|exists:jenis_kerusakans,id',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'video' => 'nullable|mimes:mp4,mov,avi|max:5120',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
+            'video' => 'nullable|mimes:mp4,mov,avi|max:20000',
             'status' => 'required|string|in:menunggu,diproses,selesai,dibatalkan',
         ]);
 
@@ -94,8 +94,8 @@ class ReservasiController extends Controller
             'noTelp' => 'required|string|max:20',
             'idJenisKerusakan' => 'required|exists:jenis_kerusakans,id',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'video' => 'nullable|mimes:mp4,mov,avi|max:5120',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
+            'video' => 'nullable|mimes:mp4,mov,avi|max:20000',
             'status' => 'required|string|in:menunggu,diproses,selesai,dibatalkan',
         ]);
 
