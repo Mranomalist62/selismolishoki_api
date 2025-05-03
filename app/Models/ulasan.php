@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ulasans extends Model
+class Ulasan extends Model
 {
     use HasFactory;
 
@@ -26,9 +26,9 @@ class Ulasans extends Model
 
     public $timestamps = true;
 
-    public function createUlasan(array $data): Ulasans
+    public function createUlasan(array $data): Ulasan
     {
-        return Ulasans::create([
+        return Ulasan::create([
             'nama'   => $data['nama'],
             'ulasan' => $data['ulasan'],
             'rating' => $data['rating'] ?? 0, // use 0 if rating not provided
@@ -37,17 +37,17 @@ class Ulasans extends Model
 
     public function getAllUlasans()
     {
-        return Ulasans::all();
+        return Ulasan::all();
     }
 
     public function getUlasanById(int $id)
     {
-        return Ulasans::find($id);
+        return Ulasan::find($id);
     }
 
     public function updateUlasan(int $id, array $data): bool
     {
-        $ulasan = Ulasans::find($id);
+        $ulasan = Ulasan::find($id);
         if (!$ulasan) {
             return false;
         }
@@ -61,7 +61,7 @@ class Ulasans extends Model
 
     public function deleteUlasan(int $id): bool
     {
-        $ulasan = Ulasans::find($id);
+        $ulasan = Ulasan::find($id);
         if (!$ulasan) {
             return false;
         }

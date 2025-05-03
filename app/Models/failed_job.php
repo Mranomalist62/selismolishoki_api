@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class failed_jobs extends Model
+class failed_job extends Model
 {
     use HasFactory;
 

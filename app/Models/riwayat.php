@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Riwayats extends Model
+class Riwayat extends Model
 {
     use HasFactory;
 
@@ -27,11 +27,11 @@ class Riwayats extends Model
 
     public function reservasi()
     {
-        return $this->belongsTo(Reservasis::class, 'idReservasi');
+        return $this->belongsTo(Reservasi::class, 'idReservasi');
     }
 
     // Create
-    public function createRiwayat(array $data): Riwayats
+    public function createRiwayat(array $data): Riwayat
     {
         return self::create([
             'idReservasi' => $data['idReservasi'],

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
-class Data_Pelanggans extends Model
+class Data_Pelanggan extends Model
 {
     use HasFactory;
 

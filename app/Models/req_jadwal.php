@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Req_jadwals extends Model
+class Req_jadwal extends Model
 {
     use HasFactory;
 
@@ -25,7 +25,7 @@ class Req_jadwals extends Model
     // Relationship with Reservasi
     public function reservasi()
     {
-        return $this->belongsTo(Reservasis::class, 'idReservasi');
+        return $this->belongsTo(Reservasi::class, 'idReservasi');
     }
 
     // CREATE

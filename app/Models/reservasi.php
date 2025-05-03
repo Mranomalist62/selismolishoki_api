@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Reservasis extends Model
+class Reservasi extends Model
 {
     use HasFactory;
 
@@ -37,17 +37,17 @@ class Reservasis extends Model
 
     public function jenisKerusakan()
     {
-        return $this->belongsTo(Jenis_kerusakans::class, 'idJenisKerusakan');
+        return $this->belongsTo(Jenis_kerusakan::class, 'idJenisKerusakan');
     }
 
     public function riwayats()
     {
-        return $this->hasMany(Riwayats::class, 'idReservasi');
+        return $this->hasMany(Riwayat::class, 'idReservasi');
     }
 
-    public function createReservasi(array $data): Reservasis
+    public function createReservasi(array $data): Reservasi
     {
-        return Reservasis::create([
+        return Reservasi::create([
             'servis'           => $data['servis'],
             'namaLengkap'      => $data['namaLengkap'],
             'alamatLengkap'    => $data['alamatLengkap'],
@@ -65,7 +65,7 @@ class Reservasis extends Model
 
     public function deleteReservasi(int $id): bool
     {
-        $reservasi = Reservasis::find($id);
+        $reservasi = Reservasi::find($id);
         if (!$reservasi) {
             return false;
         }

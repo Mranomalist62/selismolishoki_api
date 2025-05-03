@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Job_batches extends Model
+class Job_batche
+ extends Model
 {
     use HasFactory;
 
