@@ -26,7 +26,7 @@ class PelangganController extends Controller
         // Validasi input dengan tambahan latitude dan longitude
         $validatedData = $request->validate([
             'namaLengkap' => 'required|string|max:255',
-            'noTelp' => 'required|string|max:20',
+            'noTelp' => 'required|string|max:15',
             'alamatLengkap' => 'required|string',
             'idJenisKerusakan' => 'required|integer|exists:jenis_kerusakans,id',
             'deskripsi' => 'required|string',
