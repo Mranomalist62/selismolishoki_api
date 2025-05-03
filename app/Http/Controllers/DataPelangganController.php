@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Data_Pelanggans;
+use App\Models\Data_Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -13,9 +13,9 @@ class DataPelangganController extends Controller
      */
     public function index()
     {
-        $dataPelanggans = Data_Pelanggans::orderBy('created_at', 'desc')
+        $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
             ->paginate(10);
-            
+
         return view('data_pelanggans.index', compact('dataPelanggans'));
     }
 
@@ -42,7 +42,7 @@ class DataPelangganController extends Controller
         // Generate kode unik
         $validated['kode'] = 'PLG-' . date('Ymd') . '-' . Str::upper(Str::random(4));
 
-        Data_Pelanggans::create($validated);
+        Data_Pelanggan::create($validated);
 
         return redirect()->route('data-pelanggans.index')
             ->with('success', 'Data pelanggan berhasil dibuat dengan kode: ' . $validated['kode']);
@@ -51,7 +51,7 @@ class DataPelangganController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Data_Pelanggans $data_pelanggan)
+    public function show(Data_Pelanggan $data_pelanggan)
     {
         return view('data_pelanggans.show', compact('data_pelanggan'));
     }
@@ -59,7 +59,7 @@ class DataPelangganController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Data_Pelanggans $data_pelanggan)
+    public function edit(Data_Pelanggan $data_pelanggan)
     {
         return view('data_pelanggans.edit', compact('data_pelanggan'));
     }
@@ -67,7 +67,7 @@ class DataPelangganController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Data_Pelanggans $data_pelanggan)
+    public function update(Request $request, Data_Pelanggan $data_pelanggan)
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
@@ -85,7 +85,7 @@ class DataPelangganController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Data_Pelanggans $data_pelanggan)
+    public function destroy(Data_Pelanggan $data_pelanggan)
     {
         $data_pelanggan->delete();
 
@@ -98,9 +98,9 @@ class DataPelangganController extends Controller
      */
     public function apiIndex()
     {
-        $dataPelanggans = Data_Pelanggans::orderBy('created_at', 'desc')
+        $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
             ->get();
-            
+
         return response()->json($dataPelanggans);
     }
 
@@ -109,8 +109,8 @@ class DataPelangganController extends Controller
      */
     public function apiShow($id)
     {
-        $dataPelanggan = Data_Pelanggans::findOrFail($id);
-            
+        $dataPelanggan = Data_Pelanggan::findOrFail($id);
+
         return response()->json($dataPelanggan);
     }
 
@@ -120,11 +120,11 @@ class DataPelangganController extends Controller
     public function apiSearch(Request $request)
     {
         $query = $request->input('query');
-        
-        $results = Data_Pelanggans::where('nama', 'like', "%$query%")
+
+        $results = Data_Pelanggan::where('nama', 'like', "%$query%")
             ->orWhere('noHP', 'like', "%$query%")
             ->get();
-            
+
         return response()->json($results);
     }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Data_Pelanggans;
+use App\Models\Data_Pelanggan;
 use Illuminate\Http\Request;
-use App\Models\Jadwals;
-use App\Models\Jenis_kerusakans;
-use App\Models\Req_jadwals;
-use App\Models\Reservasis;
-use App\Models\Riwayats;
-use App\Models\Ulasans;
+use App\Models\Jadwal;
+use App\Models\Jenis_kerusakan;
+use App\Models\Req_jadwal;
+use App\Models\Reservasi;
+use App\Models\Riwayat;
+use App\Models\Ulasan;
 use Illuminate\Support\Facades\Storage;
 
 class PelangganController extends Controller
@@ -17,7 +17,7 @@ class PelangganController extends Controller
     // Menampilkan form reservasi untuk Home Service
     public function create()
     {
-        $jenisKerusakan = Jenis_kerusakans::all();
+        $jenisKerusakan = Jenis_kerusakan::all();
         return view('services.servis', compact('jenisKerusakan'));
     }
 
@@ -46,7 +46,7 @@ class PelangganController extends Controller
         $videoPath = $request->hasFile('video') ? $request->file('video')->store('videos/damage', 'public') : null;
 
         // Membuat reservasi baru untuk Home Service
-        $reservasi = new Reservasis();
+        $reservasi = new Reservasi();
         $reservasi->servis = 'Home Service';
         $reservasi->namaLengkap = $validatedData['namaLengkap'];
         $reservasi->noTelp = $validatedData['noTelp'];
@@ -60,7 +60,7 @@ class PelangganController extends Controller
         $reservasi->save();
 
         // Cek dan update/create data pelanggan dengan tambahan koordinat
-        $pelanggan = Data_Pelanggans::updateOrCreate(
+        $pelanggan = Data_Pelanggan::updateOrCreate(
             ['noHP' => $request->noTelp],
             [
                 'nama' => $request->namaLengkap,
@@ -74,7 +74,7 @@ class PelangganController extends Controller
         );
 
         // Buat riwayat untuk reservasi
-        Riwayats::create([
+        Riwayat::create([
             'idReservasi' => $reservasi->id,
             'status' => $reservasi->status,
         ]);
@@ -115,7 +115,7 @@ class PelangganController extends Controller
         $videoPath = $request->hasFile('video') ? $request->file('video')->store('videos/damage', 'public') : null;
 
         // Membuat reservasi baru untuk Garage Service
-        $reservasi = new Reservasis();
+        $reservasi = new Reservasi();
         $reservasi->servis = 'Garage Service';
         $reservasi->namaLengkap = $validatedData['namaLengkap'];
         $reservasi->noTelp = $validatedData['noTelp'];
@@ -129,7 +129,7 @@ class PelangganController extends Controller
         $reservasi->save();
 
         // Cek dan update/create data pelanggan (tanpa koordinat untuk garage service)
-        $pelanggan = Data_Pelanggans::updateOrCreate(
+        $pelanggan = Data_Pelanggan::updateOrCreate(
             ['noHP' => $request->noTelp],
             [
                 'nama' => $request->namaLengkap,
@@ -141,7 +141,7 @@ class PelangganController extends Controller
         );
 
         // Buat riwayat untuk reservasi
-        Riwayats::create([
+        Riwayat::create([
             'idReservasi' => $reservasi->id,
             'status' => $reservasi->status,
         ]);
@@ -164,7 +164,7 @@ class PelangganController extends Controller
     // Menampilkan form reservasi untuk Garage Service
     public function createGarage()
     {
-        $jenisKerusakan = Jenis_kerusakans::all();
+        $jenisKerusakan = Jenis_kerusakan::all();
         return view('services.servisgarage', compact('jenisKerusakan'));
     }
 
@@ -175,7 +175,7 @@ class PelangganController extends Controller
 
     public function cekResi($noResi)
     {
-        $reservasi = Reservasis::where('noResi', $noResi)->first();
+        $reservasi = Reservasi::where('noResi', $noResi)->first();
 
         if (!$reservasi) {
             return response()->json([
@@ -184,8 +184,8 @@ class PelangganController extends Controller
             ]);
         }
 
-        $riwayat = Riwayats::where('idReservasi', $reservasi->id)->orderBy('created_at', 'desc')->get();
-        $jadwal = ($reservasi->status == 'confirmed') ? Jadwals::where('idReservasi', $reservasi->id)->first() : null;
+        $riwayat = Riwayat::where('idReservasi', $reservasi->id)->orderBy('created_at', 'desc')->get();
+        $jadwal = ($reservasi->status == 'confirmed') ? Jadwal::where('idReservasi', $reservasi->id)->first() : null;
 
         $statusMapping = [
             'pending' => 'Menunggu Konfirmasi',
@@ -230,7 +230,7 @@ class PelangganController extends Controller
             'no_resi' => 'required|string',
         ]);
 
-        $reservasi = Reservasis::where('noResi', $request->input('no_resi'))->first();
+        $reservasi = Reservasi::where('noResi', $request->input('no_resi'))->first();
 
         if (!$reservasi) {
             return response()->json([
@@ -263,7 +263,7 @@ class PelangganController extends Controller
             'rating' => 'required|integer|between:1,5',
         ]);
 
-        $reservasi = Reservasis::where('noResi', $validatedData['noResi'])
+        $reservasi = Reservasi::where('noResi', $validatedData['noResi'])
             ->where('noTelp', $validatedData['noTelp'])
             ->first();
 
@@ -274,7 +274,7 @@ class PelangganController extends Controller
             ]);
         }
 
-        Ulasans::create([
+        Ulasan::create([
             'nama' => $reservasi->namaLengkap,
             'ulasan' => $validatedData['ulasan'],
             'rating' => $validatedData['rating'],
@@ -296,7 +296,7 @@ class PelangganController extends Controller
             'waktuSelesai' => 'required|date_format:H:i|after:waktuMulai',
         ]);
 
-        $jadwal = Req_jadwals::create($validatedData);
+        $jadwal = Req_jadwal::create($validatedData);
 
         return response()->json([
             'success' => true,
@@ -308,7 +308,7 @@ class PelangganController extends Controller
     // API Endpoint untuk mendapatkan pelanggan home service dengan lokasi
     public function apiHomeService()
     {
-        $homeServices = Data_Pelanggans::with(['reservasi' => function ($query) {
+        $homeServices = Data_Pelanggan::with(['reservasi' => function ($query) {
             $query->where('servis', 'Home Service')
                 ->where('status', '!=', 'cancelled');
         }])
@@ -333,9 +333,9 @@ class PelangganController extends Controller
         $longitude = $request->longitude;
         $radius = $request->radius;
 
-        $homeServices = Data_Pelanggans::where('jenis_layanan', 'home_service')
+        $homeServices = Data_Pelanggan::where('jenis_layanan', 'home_service')
             ->selectRaw(
-                "*, 
+                "*,
                 (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance",
                 [$latitude, $longitude, $latitude]
             )

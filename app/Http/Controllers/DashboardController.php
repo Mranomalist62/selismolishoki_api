@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Data_Pelanggans;
-use App\Models\Ulasans; // Make sure to import your Ulasan model
-use App\Models\Reservasis;
+use App\Models\Data_Pelanggan;
+use App\Models\Ulasan; // Make sure to import your Ulasan model
+use App\Models\Reservasi;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -12,11 +12,11 @@ class DashboardController extends Controller
     public function index()
     {
         // Fetch data for the dashboard
-        $totalReservasi = Reservasis::count();
-        $homeServiceReservasi = Reservasis::where('servis', 'Home Service')->count();
-        $bengkelReservasi = Reservasis::where('servis', 'Garage Service')->count();
-        $averageRating = Ulasans::avg('rating'); // Get average rating from ulasans
-        $totalPelanggan = Data_Pelanggans::count();
+        $totalReservasi = Reservasi::count();
+        $homeServiceReservasi = Reservasi::where('servis', 'Home Service')->count();
+        $bengkelReservasi = Reservasi::where('servis', 'Garage Service')->count();
+        $averageRating = Ulasan::avg('rating'); // Get average rating from ulasans
+        $totalPelanggan = Data_Pelanggan::count();
 
         return view('admin.dashboard', compact('totalReservasi', 'homeServiceReservasi', 'bengkelReservasi', 'averageRating', 'totalPelanggan'));
     }

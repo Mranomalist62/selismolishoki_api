@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Reservasis;
-use App\Models\Jenis_kerusakans;
-use App\Models\Riwayats;
-use App\Models\Data_pelanggans;
+use App\Models\Reservasi;
+use App\Models\Jenis_kerusakan;
+use App\Models\Riwayat;
+use App\Models\Data_pelanggan;
 use App\Models\Req_jadwals;
 
 class ReservasiController extends Controller
@@ -17,9 +17,9 @@ class ReservasiController extends Controller
         $searchResi = $request->input('searchResi');
         $searchNama = $request->input('searchNama');
         $filterJenisKerusakan = $request->input('jenisKerusakan');
-    
+
         // Query untuk reservasi yang belum 'completed'
-        $reservasis = Reservasis::with(['jenisKerusakan', 'reqJadwals']) // Tambahkan relasi reqJadwals
+        $reservasis = Reservasi::with(['jenisKerusakan', 'reqJadwals']) // Tambahkan relasi reqJadwals
             ->where('status', '!=', 'completed')
             ->when($searchResi, function ($query, $searchResi) {
                 return $query->where('noResi', 'like', "%{$searchResi}%");
@@ -31,9 +31,9 @@ class ReservasiController extends Controller
                 return $query->where('idJenisKerusakan', $filterJenisKerusakan);
             })
             ->paginate(10);
-    
-        $jenisKerusakan = Jenis_kerusakans::all();
-    
+
+        $jenisKerusakan = Jenis_kerusakan::all();
+
         return view('admin.reservasi.index', compact('reservasis', 'jenisKerusakan'));
     }
 
@@ -44,9 +44,9 @@ class ReservasiController extends Controller
         $searchNama = $request->input('searchNama');
         $searchKodePelanggan = $request->input('kodePelanggan');
         $filterJenisKerusakan = $request->input('jenisKerusakan');
-    
+
         // Query awal untuk reservasi yang sudah 'completed'
-        $reservasiQuery = Reservasis::with('jenisKerusakan')
+        $reservasiQuery = Reservasi::with('jenisKerusakan')
             ->where('status', 'completed')
             ->when($searchResi, function ($query, $searchResi) {
                 return $query->where('noResi', 'like', "%{$searchResi}%");
@@ -64,13 +64,13 @@ class ReservasiController extends Controller
             })
             // Mengurutkan berdasarkan created_at dari tabel reservasis
             ->orderBy('reservasis.created_at', 'desc');
-        
+
         // Dapatkan hasil paginasi
         $reservasis = $reservasiQuery->paginate(10);
-    
+
         // Dapatkan semua jenis kerusakan untuk dropdown filter
-        $jenisKerusakan = Jenis_kerusakans::all();
-    
+        $jenisKerusakan = Jenis_kerusakan::all();
+
         return view('admin.reservasi.done', compact('reservasis', 'jenisKerusakan'));
     }
 
@@ -80,7 +80,7 @@ class ReservasiController extends Controller
     // Menampilkan form untuk menambahkan reservasi baru
     public function create()
     {
-        $jenisKerusakan = Jenis_kerusakans::all(); // Ambil data jenis kerusakan
+        $jenisKerusakan = Jenis_kerusakan::all(); // Ambil data jenis kerusakan
 
         return view('admin.reservasi.create', compact('jenisKerusakan'));
     }
@@ -102,13 +102,13 @@ class ReservasiController extends Controller
             'latitude' => 'required|numeric|between:-90,90', // Tambahan untuk home service
             'longitude' => 'required|numeric|between:-180,180', // Tambahan untuk home service
         ]);
-    
+
         // Cek apakah pelanggan sudah ada berdasarkan noTelp
-        $pelanggan = Data_pelanggans::where('noHP', $request->noTelp)->first();
-    
+        $pelanggan = Data_pelanggan::where('noHP', $request->noTelp)->first();
+
         // Jika pelanggan tidak ada, buat pelanggan baru
         if (!$pelanggan) {
-            $pelanggan = Data_pelanggans::create([
+            $pelanggan = Data_pelanggan::create([
                 'nama' => $request->namaLengkap,
                 'noHP' => $request->noTelp,
                 'alamat' => $request->alamatLengkap,
@@ -125,18 +125,18 @@ class ReservasiController extends Controller
                 'latitude' => $request->latitude,
             ]);
         }
-    
+
         // Simpan data reservasi
-        $reservasi = Reservasis::create(array_merge($validatedData, ['idPelanggan' => $pelanggan->id]));
-    
+        $reservasi = Reservasi::create(array_merge($validatedData, ['idPelanggan' => $pelanggan->id]));
+
         // Simpan riwayat hanya jika status diberikan
         if (!is_null($reservasi->status)) {
-            Riwayats::create([
+            Riwayat::create([
                 'idReservasi' => $reservasi->id,
                 'status' => $reservasi->status,
             ]);
         }
-    
+
         return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil ditambahkan.');
     }
 
@@ -144,8 +144,8 @@ class ReservasiController extends Controller
     // Menampilkan form untuk mengedit reservasi
     public function edit($id)
     {
-        $reservasi = Reservasis::findOrFail($id);
-        $jenisKerusakan = Jenis_kerusakans::all();
+        $reservasi = Reservasi::findOrFail($id);
+        $jenisKerusakan = Jenis_kerusakan::all();
 
         return view('admin.reservasi.edit', compact('reservasi', 'jenisKerusakan'));
     }
@@ -153,7 +153,7 @@ class ReservasiController extends Controller
     // Memperbarui reservasi
     public function update(Request $request, $id)
     {
-        $reservasi = Reservasis::findOrFail($id);
+        $reservasi = Reservasi::findOrFail($id);
 
         $validatedData = $request->validate([
             'namaLengkap' => 'nullable|string|max:255', // Nullable
@@ -175,7 +175,7 @@ class ReservasiController extends Controller
 
         // Simpan riwayat hanya jika status diberikan
         if (!is_null($reservasi->status)) {
-            Riwayats::create([
+            Riwayat::create([
                 'idReservasi' => $reservasi->id,
                 'status' => $reservasi->status,
             ]);
@@ -186,14 +186,14 @@ class ReservasiController extends Controller
 
     public function destroy($id)
     {
-        $reservasi = Reservasis::findOrFail($id);
-    
+        $reservasi = Reservasi::findOrFail($id);
+
         // Hapus data terkait di req_jadwals
         $reservasi->reqJadwals()->delete();
-    
+
         // Hapus data di reservasi
         $reservasi->delete();
-    
+
         return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil dihapus.');
     }
 
@@ -201,8 +201,8 @@ class ReservasiController extends Controller
     public function show($id)
     {
         // Mengambil data reservasi berdasarkan ID, beserta jenis kerusakan dan riwayat
-        $reservasi = Reservasis::with('jenisKerusakan')->findOrFail($id);
-        $riwayats = Riwayats::where('idReservasi', $id)->get(); // Mengambil data riwayat terkait
+        $reservasi = Reservasi::with('jenisKerusakan')->findOrFail($id);
+        $riwayats = Riwayat::where('idReservasi', $id)->get(); // Mengambil data riwayat terkait
 
         return view('admin.reservasi.show', compact('reservasi', 'riwayats'));
     }
@@ -210,18 +210,18 @@ class ReservasiController extends Controller
     // Fungsi untuk mengubah status reservasi
     public function updateStatus(Request $request, $id)
     {
-        $reservasi = Reservasis::findOrFail($id);
-    
+        $reservasi = Reservasi::findOrFail($id);
+
         // Validasi input status
         $validatedData = $request->validate([
             'status' => 'required|string|in:pending,confirmed,process,completed,cancelled',
         ]);
-    
+
         if ($validatedData['status'] == 'confirmed') {
             // Redirect ke halaman tambah jadwal dengan idReservasi disertakan
             return redirect()->route('jadwal.create', ['idReservasi' => $reservasi->id]);
         }
-    
+
          // Jika status berubah menjadi 'completed', hapus semua jadwal terkait
         if ($validatedData['status'] == 'completed') {
             // Cek apakah ada jadwal terkait dan hapus semuanya
@@ -241,13 +241,13 @@ class ReservasiController extends Controller
 
         // Update status reservasi
         $reservasi->update(['status' => $validatedData['status']]);
-    
+
         // Simpan perubahan status ke riwayat
-        Riwayats::create([
+        Riwayat::create([
             'idReservasi' => $reservasi->id,
             'status' => $reservasi->status,
         ]);
-    
+
         return redirect()->route('reservasi.index')->with('success', 'Status reservasi berhasil diperbarui.');
     }
 
