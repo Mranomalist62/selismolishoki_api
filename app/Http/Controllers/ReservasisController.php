@@ -2,165 +2,253 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Reservasis;
 use App\Models\Jenis_kerusakans;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Riwayats;
+use App\Models\Data_pelanggans;
+use App\Models\Req_jadwals;
 
 class ReservasiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $reservasis = Reservasis::with(['jenisKerusakan', 'riwayats'])
-            ->orderBy('created_at', 'desc')
+        // Menerima input pencarian dan filter
+        $searchResi = $request->input('searchResi');
+        $searchNama = $request->input('searchNama');
+        $filterJenisKerusakan = $request->input('jenisKerusakan');
+    
+        // Query untuk reservasi yang belum 'completed'
+        $reservasis = Reservasis::with(['jenisKerusakan', 'reqJadwals']) // Tambahkan relasi reqJadwals
+            ->where('status', '!=', 'completed')
+            ->when($searchResi, function ($query, $searchResi) {
+                return $query->where('noResi', 'like', "%{$searchResi}%");
+            })
+            ->when($searchNama, function ($query, $searchNama) {
+                return $query->where('namaLengkap', 'like', "%{$searchNama}%");
+            })
+            ->when($filterJenisKerusakan, function ($query, $filterJenisKerusakan) {
+                return $query->where('idJenisKerusakan', $filterJenisKerusakan);
+            })
             ->paginate(10);
-            
-        return view('reservasis.index', compact('reservasis'));
+    
+        $jenisKerusakan = Jenis_kerusakans::all();
+    
+        return view('admin.reservasi.index', compact('reservasis', 'jenisKerusakan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function history(Request $request)
+    {
+        // Menerima input pencarian dan filter
+        $searchResi = $request->input('searchResi');
+        $searchNama = $request->input('searchNama');
+        $searchKodePelanggan = $request->input('kodePelanggan');
+        $filterJenisKerusakan = $request->input('jenisKerusakan');
+    
+        // Query awal untuk reservasi yang sudah 'completed'
+        $reservasiQuery = Reservasis::with('jenisKerusakan')
+            ->where('status', 'completed')
+            ->when($searchResi, function ($query, $searchResi) {
+                return $query->where('noResi', 'like', "%{$searchResi}%");
+            })
+            ->when($searchNama, function ($query, $searchNama) {
+                return $query->where('namaLengkap', 'like', "%{$searchNama}%");
+            })
+            ->when($filterJenisKerusakan, function ($query, $filterJenisKerusakan) {
+                return $query->where('idJenisKerusakan', $filterJenisKerusakan);
+            })
+            ->when($searchKodePelanggan, function ($query, $searchKodePelanggan) {
+                // Lakukan join dengan tabel data_pelanggan untuk mengakses kolom noTelp
+                $query->join('data_pelanggans', 'reservasis.noTelp', '=', 'data_pelanggans.noHP')
+                      ->where('data_pelanggans.kode', $searchKodePelanggan);
+            })
+            // Mengurutkan berdasarkan created_at dari tabel reservasis
+            ->orderBy('reservasis.created_at', 'desc');
+        
+        // Dapatkan hasil paginasi
+        $reservasis = $reservasiQuery->paginate(10);
+    
+        // Dapatkan semua jenis kerusakan untuk dropdown filter
+        $jenisKerusakan = Jenis_kerusakans::all();
+    
+        return view('admin.reservasi.done', compact('reservasis', 'jenisKerusakan'));
+    }
+
+
+
+
+    // Menampilkan form untuk menambahkan reservasi baru
     public function create()
     {
-        $jenisKerusakans = Jenis_kerusakans::all();
-        return view('reservasis.create', compact('jenisKerusakans'));
+        $jenisKerusakan = Jenis_kerusakans::all(); // Ambil data jenis kerusakan
+
+        return view('admin.reservasi.create', compact('jenisKerusakan'));
     }
 
-    /**
-     * Store a newly created resource in storage
-     */
+    // Menyimpan reservasi baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'servis' => 'required|string|max:255',
+        $validatedData = $request->validate([
             'namaLengkap' => 'required|string|max:255',
             'alamatLengkap' => 'required|string',
-            'noTelp' => 'required|string|max:16',
+            'noTelp' => 'required|string|max:15',
             'idJenisKerusakan' => 'required|exists:jenis_kerusakans,id',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
-            'video' => 'nullable|mimes:mp4,mov,avi|max:20000',
-            'status' => 'required|string|in:menunggu,diproses,selesai,dibatalkan',
+            'gambar' => 'nullable|string',
+            'video' => 'nullable|string',
+            'noResi' => 'required|unique:reservasis',
+            'servis' => 'required|string',
+            'status' => 'nullable|string|in:pending,confirmed,process,completed,cancelled', // Status menjadi nullable
+            'latitude' => 'required|numeric|between:-90,90', // Tambahan untuk home service
+            'longitude' => 'required|numeric|between:-180,180', // Tambahan untuk home service
+        ]);
+    
+        // Cek apakah pelanggan sudah ada berdasarkan noTelp
+        $pelanggan = Data_pelanggans::where('noHP', $request->noTelp)->first();
+    
+        // Jika pelanggan tidak ada, buat pelanggan baru
+        if (!$pelanggan) {
+            $pelanggan = Data_pelanggans::create([
+                'nama' => $request->namaLengkap,
+                'noHP' => $request->noTelp,
+                'alamat' => $request->alamatLengkap,
+                'longitude' => $request->longitude,
+                'latitude' => $request->latitude,
+            ]);
+        } else {
+            // Jika pelanggan sudah ada, Anda bisa memperbarui data jika perlu
+            $pelanggan->update([
+                'nama' => $request->namaLengkap,
+                'noHP' => $request->noTelp,
+                'alamat' => $request->alamatLengkap,
+                'longitude' => $request->longitude,
+                'latitude' => $request->latitude,
+            ]);
+        }
+    
+        // Simpan data reservasi
+        $reservasi = Reservasis::create(array_merge($validatedData, ['idPelanggan' => $pelanggan->id]));
+    
+        // Simpan riwayat hanya jika status diberikan
+        if (!is_null($reservasi->status)) {
+            Riwayats::create([
+                'idReservasi' => $reservasi->id,
+                'status' => $reservasi->status,
+            ]);
+        }
+    
+        return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil ditambahkan.');
+    }
+
+
+    // Menampilkan form untuk mengedit reservasi
+    public function edit($id)
+    {
+        $reservasi = Reservasis::findOrFail($id);
+        $jenisKerusakan = Jenis_kerusakans::all();
+
+        return view('admin.reservasi.edit', compact('reservasi', 'jenisKerusakan'));
+    }
+
+    // Memperbarui reservasi
+    public function update(Request $request, $id)
+    {
+        $reservasi = Reservasis::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'namaLengkap' => 'nullable|string|max:255', // Nullable
+            'alamatLengkap' => 'nullable|string', // Nullable
+            'noTelp' => 'nullable|string|max:15', // Nullable
+            'idJenisKerusakan' => 'nullable|exists:jenis_kerusakans,id', // Nullable
+            'deskripsi' => 'nullable|string', // Nullable
+            'gambar' => 'nullable|string', // Tetap nullable
+            'video' => 'nullable|string', // Tetap nullable
+            'noResi' => 'nullable|unique:reservasis,noResi,' . $reservasi->id, // Nullable
+            'servis' => 'nullable|string', // Nullable
+            'status' => 'nullable|string|in:pending,confirmed,process,completed,cancelled', // Tetap nullable
+            'latitude' => 'required|numeric|between:-90,90', // Tambahan untuk home service
+            'longitude' => 'required|numeric|between:-180,180', // Tambahan untuk home service
         ]);
 
-        // Generate nomor resi unik
-        $validated['noResi'] = 'RSV-' . date('Ymd') . '-' . strtoupper(uniqid());
+        // Update data reservasi
+        $reservasi->update($validatedData);
 
-        // Handle file uploads
-        if ($request->hasFile('gambar')) {
-            $validated['gambar'] = $request->file('gambar')->store('reservasi/gambar', 'public');
+        // Simpan riwayat hanya jika status diberikan
+        if (!is_null($reservasi->status)) {
+            Riwayats::create([
+                'idReservasi' => $reservasi->id,
+                'status' => $reservasi->status,
+            ]);
         }
 
-        if ($request->hasFile('video')) {
-            $validated['video'] = $request->file('video')->store('reservasi/video', 'public');
-        }
-
-        Reservasis::create($validated);
-
-        return redirect()->route('reservasis.index')
-            ->with('success', 'Reservasi berhasil dibuat dengan nomor resi: ' . $validated['noResi']);
+        return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil diperbarui.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Reservasis $reservasi)
+    public function destroy($id)
     {
-        return view('reservasis.show', compact('reservasi'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Reservasis $reservasi)
-    {
-        $jenisKerusakans = Jenis_kerusakans::all();
-        return view('reservasis.edit', compact('reservasi', 'jenisKerusakans'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Reservasis $reservasi)
-    {
-        $validated = $request->validate([
-            'servis' => 'required|string|max:255',
-            'namaLengkap' => 'required|string|max:255',
-            'alamatLengkap' => 'required|string',
-            'noTelp' => 'required|string|max:16',
-            'idJenisKerusakan' => 'required|exists:jenis_kerusakans,id',
-            'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
-            'video' => 'nullable|mimes:mp4,mov,avi|max:20000',
-            'status' => 'required|string|in:menunggu,diproses,selesai,dibatalkan',
-        ]);
-
-        // Handle file uploads
-        if ($request->hasFile('gambar')) {
-            // Delete old image if exists
-            if ($reservasi->gambar) {
-                Storage::disk('public')->delete($reservasi->gambar);
-            }
-            $validated['gambar'] = $request->file('gambar')->store('reservasi/gambar', 'public');
-        }
-
-        if ($request->hasFile('video')) {
-            // Delete old video if exists
-            if ($reservasi->video) {
-                Storage::disk('public')->delete($reservasi->video);
-            }
-            $validated['video'] = $request->file('video')->store('reservasi/video', 'public');
-        }
-
-        $reservasi->update($validated);
-
-        return redirect()->route('reservasis.index')
-            ->with('success', 'Reservasi berhasil diperbarui');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Reservasis $reservasi)
-    {
-        // Delete associated files
-        if ($reservasi->gambar) {
-            Storage::disk('public')->delete($reservasi->gambar);
-        }
-        if ($reservasi->video) {
-            Storage::disk('public')->delete($reservasi->video);
-        }
-
+        $reservasi = Reservasis::findOrFail($id);
+    
+        // Hapus data terkait di req_jadwals
+        $reservasi->reqJadwals()->delete();
+    
+        // Hapus data di reservasi
         $reservasi->delete();
-
-        return redirect()->route('reservasis.index')
-            ->with('success', 'Reservasi berhasil dihapus');
+    
+        return redirect()->route('reservasi.index')->with('success', 'Reservasi berhasil dihapus.');
     }
 
-    /**
-     * API Endpoint untuk mendapatkan data reservasi
-     */
-    public function apiIndex()
+    // Menampilkan detail reservasi dan riwayatnya
+    public function show($id)
     {
-        $reservasis = Reservasis::with(['jenisKerusakan', 'riwayats'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        return response()->json($reservasis);
+        // Mengambil data reservasi berdasarkan ID, beserta jenis kerusakan dan riwayat
+        $reservasi = Reservasis::with('jenisKerusakan')->findOrFail($id);
+        $riwayats = Riwayats::where('idReservasi', $id)->get(); // Mengambil data riwayat terkait
+
+        return view('admin.reservasi.show', compact('reservasi', 'riwayats'));
     }
 
-    /**
-     * API Endpoint untuk menampilkan detail reservasi
-     */
-    public function apiShow($id)
+    // Fungsi untuk mengubah status reservasi
+    public function updateStatus(Request $request, $id)
     {
-        $reservasi = Reservasis::with(['jenisKerusakan', 'riwayats'])
-            ->findOrFail($id);
-            
-        return response()->json($reservasi);
+        $reservasi = Reservasis::findOrFail($id);
+    
+        // Validasi input status
+        $validatedData = $request->validate([
+            'status' => 'required|string|in:pending,confirmed,process,completed,cancelled',
+        ]);
+    
+        if ($validatedData['status'] == 'confirmed') {
+            // Redirect ke halaman tambah jadwal dengan idReservasi disertakan
+            return redirect()->route('jadwal.create', ['idReservasi' => $reservasi->id]);
+        }
+    
+         // Jika status berubah menjadi 'completed', hapus semua jadwal terkait
+        if ($validatedData['status'] == 'completed') {
+            // Cek apakah ada jadwal terkait dan hapus semuanya
+            $jadwals = $reservasi->jadwals; // Menggunakan relasi hasMany
+            if ($jadwals->isNotEmpty()) {
+                foreach ($jadwals as $jadwal) {
+                    $jadwal->delete(); // Menghapus setiap jadwal terkait
+                }
+            }
+            $reqJadwals = $reservasi->reqJadwals;
+            if ($reqJadwals->isNotEmpty()) {
+                foreach ($reqJadwals as $reqJadwal) {
+                    $reqJadwal->delete(); // Menghapus setiap reqJadwal terkait
+                }
+            }
+        }
+
+        // Update status reservasi
+        $reservasi->update(['status' => $validatedData['status']]);
+    
+        // Simpan perubahan status ke riwayat
+        Riwayats::create([
+            'idReservasi' => $reservasi->id,
+            'status' => $reservasi->status,
+        ]);
+    
+        return redirect()->route('reservasi.index')->with('success', 'Status reservasi berhasil diperbarui.');
     }
+
 }
