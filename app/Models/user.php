@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;  // Import this class
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class User extends Authenticatable
 {
-    use HasFactory;
+    use Notifiable;
 
     // Define the table if it's different from the plural form of the model
     protected $table = 'users';
@@ -31,14 +33,15 @@ class User extends Model
     // Optionally disable timestamps if you don't want Eloquent to manage created_at and updated_at automatically
     public $timestamps = true;
 
-    public static function createUser(array $data) {
-    return self::create([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'password' => bcrypt($data['password']), // Always hash passwords
-        'remember_token' => $data['remember_token'] ?? null,
-    ]);
-}
+    public static function createUser(array $data)
+    {
+        return self::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']), // Always hash passwords
+            'remember_token' => $data['remember_token'] ?? null,
+        ]);
+    }
 
     public static function getUserById($id)
     {

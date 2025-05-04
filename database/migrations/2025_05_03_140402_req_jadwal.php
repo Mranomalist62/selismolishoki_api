@@ -20,8 +20,9 @@ return new class extends Migration {
 
             // Add foreign key constraint (optional but recommended)
             $table->foreign('idReservasi')
-                  ->references('id')->on('reservasis')
-                  ->onDelete('set null'); // or 'cascade' depending on your app logic
+                    ->references('id')
+                    ->on('reservasis')
+                    ->onDelete('cascade');
         });
     }
 

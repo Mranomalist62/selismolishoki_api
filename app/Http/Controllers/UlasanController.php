@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ulasan;
+use App\Models\ulasan;
 use Illuminate\Http\Request;
 
 class UlasanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Ulasan::query();
+        $query = ulasan::query();
 
         // Search by name
         if ($request->filled('search_nama')) {
@@ -39,17 +39,17 @@ class UlasanController extends Controller
             'rating' => 'required|integer|between:1,5',
         ]);
 
-        Ulasan::create($request->all());
+        ulasan::create($request->all());
 
         return redirect()->route('ulasan.index')->with('success', 'Ulasan berhasil ditambahkan.');
     }
 
-    public function edit(Ulasan $ulasan)
+    public function edit(ulasan $ulasan)
     {
         return view('admin.ulasan.edit', compact('ulasan'));
     }
 
-    public function update(Request $request, Ulasan $ulasan)
+    public function update(Request $request, ulasan $ulasan)
     {
         $request->validate([
             'nama' => 'required|string|max:255',
@@ -62,7 +62,7 @@ class UlasanController extends Controller
         return redirect()->route('ulasan.index')->with('success', 'Ulasan berhasil diperbarui.');
     }
 
-    public function destroy(Ulasan $ulasan)
+    public function destroy(ulasan $ulasan)
     {
         $ulasan->delete();
         return redirect()->route('ulasan.index')->with('success', 'Ulasan berhasil dihapus.');

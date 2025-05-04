@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Data_Pelanggan;
 use Illuminate\Http\Request;
 use App\Models\Jadwal;
-use App\Models\Jenis_kerusakan;
+use App\Models\JenisKerusakan;
 use App\Models\Req_jadwal;
 use App\Models\Reservasi;
 use App\Models\Riwayat;
-use App\Models\Ulasan;
+use App\Models\ulasan;
 use Illuminate\Support\Facades\Storage;
 
 class PelangganController extends Controller
@@ -17,7 +17,7 @@ class PelangganController extends Controller
     // Menampilkan form reservasi untuk Home Service
     public function create()
     {
-        $jenisKerusakan = Jenis_kerusakan::all();
+        $jenisKerusakan = JenisKerusakan::all();
         return view('services.servis', compact('jenisKerusakan'));
     }
 
@@ -164,7 +164,7 @@ class PelangganController extends Controller
     // Menampilkan form reservasi untuk Garage Service
     public function createGarage()
     {
-        $jenisKerusakan = Jenis_kerusakan::all();
+        $jenisKerusakan = JenisKerusakan::all();
         return view('services.servisgarage', compact('jenisKerusakan'));
     }
 
@@ -274,7 +274,7 @@ class PelangganController extends Controller
             ]);
         }
 
-        Ulasan::create([
+        ulasan::create([
             'nama' => $reservasi->namaLengkap,
             'ulasan' => $validatedData['ulasan'],
             'rating' => $validatedData['rating'],

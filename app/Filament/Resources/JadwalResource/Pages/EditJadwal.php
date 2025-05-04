@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\UsersResource\Pages;
+namespace App\Filament\Resources\JadwalResource\Pages;
 
-use App\Filament\Resources\UsersResource;
+use App\Filament\Resources\JadwalResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditUsers extends EditRecord
+class EditJadwal extends EditRecord
 {
-    protected static string $resource = UsersResource::class;
+    protected static string $resource = JadwalResource::class;
 
     protected function getHeaderActions(): array
     {

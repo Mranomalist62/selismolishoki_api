@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reservasi;
-use App\Models\Jenis_kerusakan;
+use App\Models\JenisKerusakan;
 use App\Models\Riwayat;
 use App\Models\Data_pelanggan;
 use App\Models\Req_jadwals;
@@ -32,7 +32,7 @@ class ReservasiController extends Controller
             })
             ->paginate(10);
 
-        $jenisKerusakan = Jenis_kerusakan::all();
+        $jenisKerusakan = jenis_kerusakan::all();
 
         return view('admin.reservasi.index', compact('reservasis', 'jenisKerusakan'));
     }
@@ -69,7 +69,7 @@ class ReservasiController extends Controller
         $reservasis = $reservasiQuery->paginate(10);
 
         // Dapatkan semua jenis kerusakan untuk dropdown filter
-        $jenisKerusakan = Jenis_kerusakan::all();
+        $jenisKerusakan = jenis_kerusakan::all();
 
         return view('admin.reservasi.done', compact('reservasis', 'jenisKerusakan'));
     }
@@ -80,7 +80,7 @@ class ReservasiController extends Controller
     // Menampilkan form untuk menambahkan reservasi baru
     public function create()
     {
-        $jenisKerusakan = Jenis_kerusakan::all(); // Ambil data jenis kerusakan
+        $jenisKerusakan = jenis_kerusakan::all(); // Ambil data jenis kerusakan
 
         return view('admin.reservasi.create', compact('jenisKerusakan'));
     }
@@ -145,7 +145,7 @@ class ReservasiController extends Controller
     public function edit($id)
     {
         $reservasi = Reservasi::findOrFail($id);
-        $jenisKerusakan = Jenis_kerusakan::all();
+        $jenisKerusakan = jenis_kerusakan::all();
 
         return view('admin.reservasi.edit', compact('reservasi', 'jenisKerusakan'));
     }
