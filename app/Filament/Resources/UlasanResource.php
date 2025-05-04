@@ -83,4 +83,14 @@ class UlasanResource extends Resource
             'edit' => Pages\EditUlasan::route('/{record}/edit'),
         ];
     }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Ulasan';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Ulasan';
+    }
 }
