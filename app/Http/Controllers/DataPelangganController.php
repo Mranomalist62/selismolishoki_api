@@ -6,125 +6,125 @@ use App\Models\Data_Pelanggan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class DataPelangganController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
-            ->paginate(10);
+// class DataPelangganController extends Controller
+// {
+//     /**
+//      * Display a listing of the resource.
+//      */
+//     public function index()
+//     {
+//         $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
+//             ->paginate(10);
 
-        return view('data_pelanggans.index', compact('dataPelanggans'));
-    }
+//         return view('data_pelanggans.index', compact('dataPelanggans'));
+//     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('data_pelanggans.create');
-    }
+//     /**
+//      * Show the form for creating a new resource.
+//      */
+//     public function create()
+//     {
+//         return view('data_pelanggans.create');
+//     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'noHP' => 'required|string|max:16',
-            'alamat' => 'required|string',
-            'keluhan' => 'required|string',
-        ]);
+//     /**
+//      * Store a newly created resource in storage.
+//      */
+//     public function store(Request $request)
+//     {
+//         $validated = $request->validate([
+//             'nama' => 'required|string|max:255',
+//             'noHP' => 'required|string|max:16',
+//             'alamat' => 'required|string',
+//             'keluhan' => 'required|string',
+//         ]);
 
-        // Generate kode unik
-        $validated['kode'] = 'PLG-' . date('Ymd') . '-' . Str::upper(Str::random(4));
+//         // Generate kode unik
+//         $validated['kode'] = 'PLG-' . date('Ymd') . '-' . Str::upper(Str::random(4));
 
-        Data_Pelanggan::create($validated);
+//         Data_Pelanggan::create($validated);
 
-        return redirect()->route('data-pelanggans.index')
-            ->with('success', 'Data pelanggan berhasil dibuat dengan kode: ' . $validated['kode']);
-    }
+//         return redirect()->route('data-pelanggans.index')
+//             ->with('success', 'Data pelanggan berhasil dibuat dengan kode: ' . $validated['kode']);
+//     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Data_Pelanggan $data_pelanggan)
-    {
-        return view('data_pelanggans.show', compact('data_pelanggan'));
-    }
+//     /**
+//      * Display the specified resource.
+//      */
+//     public function show(Data_Pelanggan $data_pelanggan)
+//     {
+//         return view('data_pelanggans.show', compact('data_pelanggan'));
+//     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Data_Pelanggan $data_pelanggan)
-    {
-        return view('data_pelanggans.edit', compact('data_pelanggan'));
-    }
+//     /**
+//      * Show the form for editing the specified resource.
+//      */
+//     public function edit(Data_Pelanggan $data_pelanggan)
+//     {
+//         return view('data_pelanggans.edit', compact('data_pelanggan'));
+//     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Data_Pelanggan $data_pelanggan)
-    {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'noHP' => 'required|string|max:16',
-            'alamat' => 'required|string',
-            'keluhan' => 'required|string',
-        ]);
+//     /**
+//      * Update the specified resource in storage.
+//      */
+//     public function update(Request $request, Data_Pelanggan $data_pelanggan)
+//     {
+//         $validated = $request->validate([
+//             'nama' => 'required|string|max:255',
+//             'noHP' => 'required|string|max:16',
+//             'alamat' => 'required|string',
+//             'keluhan' => 'required|string',
+//         ]);
 
-        $data_pelanggan->update($validated);
+//         $data_pelanggan->update($validated);
 
-        return redirect()->route('data-pelanggans.index')
-            ->with('success', 'Data pelanggan berhasil diperbarui');
-    }
+//         return redirect()->route('data-pelanggans.index')
+//             ->with('success', 'Data pelanggan berhasil diperbarui');
+//     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Data_Pelanggan $data_pelanggan)
-    {
-        $data_pelanggan->delete();
+//     /**
+//      * Remove the specified resource from storage.
+//      */
+//     public function destroy(Data_Pelanggan $data_pelanggan)
+//     {
+//         $data_pelanggan->delete();
 
-        return redirect()->route('data-pelanggans.index')
-            ->with('success', 'Data pelanggan berhasil dihapus');
-    }
+//         return redirect()->route('data-pelanggans.index')
+//             ->with('success', 'Data pelanggan berhasil dihapus');
+//     }
 
-    /**
-     * API Endpoint untuk mendapatkan semua data pelanggan
-     */
-    public function apiIndex()
-    {
-        $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
-            ->get();
+//     /**
+//      * API Endpoint untuk mendapatkan semua data pelanggan
+//      */
+//     public function apiIndex()
+//     {
+//         $dataPelanggans = Data_Pelanggan::orderBy('created_at', 'desc')
+//             ->get();
 
-        return response()->json($dataPelanggans);
-    }
+//         return response()->json($dataPelanggans);
+//     }
 
-    /**
-     * API Endpoint untuk menampilkan detail pelanggan
-     */
-    public function apiShow($id)
-    {
-        $dataPelanggan = Data_Pelanggan::findOrFail($id);
+//     /**
+//      * API Endpoint untuk menampilkan detail pelanggan
+//      */
+//     public function apiShow($id)
+//     {
+//         $dataPelanggan = Data_Pelanggan::findOrFail($id);
 
-        return response()->json($dataPelanggan);
-    }
+//         return response()->json($dataPelanggan);
+//     }
 
-    /**
-     * API Endpoint untuk mencari pelanggan berdasarkan nama atau noHP
-     */
-    public function apiSearch(Request $request)
-    {
-        $query = $request->input('query');
+//     /**
+//      * API Endpoint untuk mencari pelanggan berdasarkan nama atau noHP
+//      */
+//     public function apiSearch(Request $request)
+//     {
+//         $query = $request->input('query');
 
-        $results = Data_Pelanggan::where('nama', 'like', "%$query%")
-            ->orWhere('noHP', 'like', "%$query%")
-            ->get();
+//         $results = Data_Pelanggan::where('nama', 'like', "%$query%")
+//             ->orWhere('noHP', 'like', "%$query%")
+//             ->get();
 
-        return response()->json($results);
-    }
-}
+//         return response()->json($results);
+//     }
+// }

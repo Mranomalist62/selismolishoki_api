@@ -37,7 +37,7 @@ class Reservasi extends Model
 
     public function jenisKerusakan()
     {
-        return $this->belongsTo(jenis_kerusakan::class, 'idJenisKerusakan');
+        return $this->belongsTo(JenisKerusakan::class, 'idJenisKerusakan');
     }
 
     public function riwayats()
