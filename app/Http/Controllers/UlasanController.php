@@ -5,8 +5,49 @@ namespace App\Http\Controllers;
 use App\Models\ulasan;
 use Illuminate\Http\Request;
 
-// class UlasanController extends Controller
-// {
+class UlasanController extends Controller
+{
+
+    public function index()
+    {
+        $ulasan = Ulasan::latest()->get(); // Optionally ordered by newest
+        return response()->json([
+            'success' => true,
+            'message' => 'List of Ulasan',
+            'data' => $ulasan
+        ], 200);
+    }
+
+
+
+
+    public function store(Request $request)
+    {
+        // Validate the request input
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'ulasan' => 'required|string',
+            'rating' => 'nullable|integer|min:0|max:5',
+        ]);
+
+        try {
+            $ulasan = (new Ulasan)->createUlasan($validated);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Ulasan berhasil ditambahkan.',
+                'data' => $ulasan,
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Terjadi kesalahan saat menambahkan ulasan.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 //     public function index(Request $request)
 //     {
 //         $query = ulasan::query();
@@ -67,4 +108,4 @@ use Illuminate\Http\Request;
 //         $ulasan->delete();
 //         return redirect()->route('ulasan.index')->with('success', 'Ulasan berhasil dihapus.');
 //     }
-// }
+}

@@ -15,6 +15,7 @@ Route::prefix('jenis-kerusakan')->controller(JenisKerusakanController::class)->g
     Route::get('/list', 'getJenisKerusakanList'); // GET /api/jenis-kerusakan/list
 });
 
-Route::prefix('/ulasan')->controller(controller: UlasanController::class)->group(function () {
-    Route::get('/add', 'store'); // GET /api/jenis-kerusakan/list
+Route::prefix('/ulasan')->controller( UlasanController::class)->group(function () {
+    Route::post('/add', 'store'); // POST /api/ulasan/add
+    Route::get('/', 'index'); //GET /api/ulasan/fetch
 });
