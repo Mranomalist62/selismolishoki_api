@@ -26,6 +26,15 @@ class Data_Pelanggan extends Model
         'updated_at',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($dataPelanggan) {
+            $dataPelanggan->kode = 'P' . (self::max('id') + 1);
+        });
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value);

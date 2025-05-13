@@ -33,6 +33,9 @@ class JenisKerusakanResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('id')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -71,5 +74,15 @@ class JenisKerusakanResource extends Resource
             'create' => Pages\CreateJenisKerusakan::route('/create'),
             'edit' => Pages\EditJenisKerusakan::route('/{record}/edit'),
         ];
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'Jenis Kerusakan';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'Jenis Kerusakan';
     }
 }

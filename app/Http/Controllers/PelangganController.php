@@ -11,6 +11,7 @@ use App\Models\Reservasi;
 use App\Models\Riwayat;
 use App\Models\ulasan;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PelangganController extends Controller
 {
@@ -31,7 +32,7 @@ class PelangganController extends Controller
                 'alamatLengkap' => 'required|string',
                 'idJenisKerusakan' => 'required|integer|exists:jenis_kerusakans,id',
                 'deskripsi' => 'required|string',
-                'gambar' => 'required|image|mimes:jpeg,png,jpg',
+                'gambar' => 'nullable|image|mimes:jpeg,png,jpg',
                 'video' => 'nullable|file|mimes:mp4,mov,avi',
                 'tanggal' => 'required|date',
                 'waktuMulai' => 'required|date_format:H:i',
@@ -41,7 +42,9 @@ class PelangganController extends Controller
             ]);
 
             // Simpan file gambar
-            $imagePath = $request->file('gambar')->store('images/damage', 'public');
+            $imagePath = $request->hasFile('gambar')
+                ? $request->file('gambar')->store('images/damage', 'public')
+                : null;
 
             // Simpan file video jika ada
             $videoPath = $request->hasFile('video')
@@ -57,6 +60,8 @@ class PelangganController extends Controller
                 'alamatLengkap' => $validatedData['alamatLengkap'],
                 'idJenisKerusakan' => $validatedData['idJenisKerusakan'],
                 'deskripsi' => $validatedData['deskripsi'],
+                'latitude' => $validatedData['latitude'],
+                'longitude' => $validatedData['longitude'],
                 'gambar' => $imagePath,
                 'video' => $videoPath,
                 'status' => 'pending',
@@ -70,10 +75,7 @@ class PelangganController extends Controller
                 [
                     'nama' => $validatedData['namaLengkap'],
                     'alamat' => $validatedData['alamatLengkap'],
-                    'keluhan' => $validatedData['deskripsi'],
-                    'latitude' => $validatedData['latitude'],
-                    'longitude' => $validatedData['longitude'],
-                    'jenis_layanan' => 'home_service'
+                    'keluhan' => $validatedData['deskripsi']
                 ]
             );
 
@@ -101,6 +103,7 @@ class PelangganController extends Controller
             ], status: 201); // HTTP 201 Created
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error(''. $e);
             return response()->json([
                 'status' => 'fail',
                 'message' => 'Validasi gagal.',
@@ -108,6 +111,7 @@ class PelangganController extends Controller
             ], 422); // HTTP 422 Unprocessable Entity
 
         } catch (\Exception $e) {
+            Log::error(message: ''. $e);
             return response()->json([
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan internal.',
@@ -160,8 +164,7 @@ class PelangganController extends Controller
                 [
                     'nama' => $validatedData['namaLengkap'],
                     'alamat' => $validatedData['alamatLengkap'],
-                    'keluhan' => $validatedData['deskripsi'],
-                    'jenis_layanan' => 'bengkel'
+                    'keluhan' => $validatedData['deskripsi']
                 ]
             );
 

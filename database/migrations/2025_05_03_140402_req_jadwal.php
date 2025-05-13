@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('req_jadwal', function (Blueprint $table) {
+        Schema::create('req_jadwals', function (Blueprint $table) {
             $table->bigIncrements('id'); // Primary key
 
             $table->unsignedBigInteger('idReservasi')->nullable(); // FK to reservasis table
