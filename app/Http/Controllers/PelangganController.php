@@ -10,7 +10,6 @@ use App\Models\Req_jadwal;
 use App\Models\Reservasi;
 use App\Models\Riwayat;
 use App\Models\ulasan;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class PelangganController extends Controller
@@ -218,53 +217,77 @@ class PelangganController extends Controller
     //     return view('services.cekresi');
     // }
 
-    public function cekResi($noResi)
+    public function cekResi(Request $request)
     {
-        $reservasi = Reservasi::where('noResi', $noResi)->first();
+        Log::info('cekResi called');
+        try {
 
-        if (!$reservasi) {
+            $noResi = $request->query('noResi');
+
+            if (!$noResi) {
+                return response()->json(['error' => 'Parameter noResi diperlukan'], 400);
+            }
+
+            Log::info("cekResi called with noResi: $noResi");
+
+            $reservasi = Reservasi::where('noResi', $noResi)->first();
+
+            if (!$reservasi) {
+                Log::warning('Reservation not found for number: ' . $noResi);
+                return response()->json([
+                    'message' => 'Nomor resi tidak ditemukan.'
+                ], 404);
+            }
+
+            $riwayat = Riwayat::where('idReservasi', $reservasi->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $jadwal = $reservasi->status === 'confirmed'
+                ? Jadwal::where('idReservasi', $reservasi->id)->first()
+                : null;
+
+            $statusMapping = [
+                'pending'   => 'Menunggu Konfirmasi',
+                'confirmed' => 'Sudah Konfirmasi',
+                'process'   => 'Proses Perbaikan',
+                'completed' => 'Selesai',
+                'cancelled' => 'Dibatalkan',
+            ];
+
+            $response = [
+                'message' => 'Data reservasi ditemukan.',
+                'data' => [
+                    'namaLengkap' => $reservasi->namaLengkap,
+                    'noTelp' => $reservasi->noTelp,
+                    'servis' => $reservasi->servis,
+                    'deskripsi' => $reservasi->deskripsi,
+                    'status' => $statusMapping[$reservasi->status] ?? $reservasi->status,
+                    'riwayat' => $riwayat,
+                    'tanggal' => $jadwal?->tanggal,
+                    'waktuMulai' => $jadwal?->waktuMulai,
+                    'waktuSelesai' => $jadwal?->waktuSelesai,
+                    'latitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->latitude ?? null : null,
+                    'longitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->longitude ?? null : null,
+                    'alamat' => $reservasi->servis === 'Home Service' ? $reservasi->alamatLengkap : null,
+                ]
+            ];
+
+            Log::info('Reservation data retrieved successfully for: ' . $noResi);
+
+            return response()->json($response, 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error while checking reservation: ' . $e->getMessage(), [
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
-                'message' => 'Nomor resi tidak ditemukan.'
-            ], 404); // jika tidak ditemukan
+                'message' => 'Terjadi kesalahan saat memproses permintaan.',
+            ], 500);
         }
-
-        $riwayat = Riwayat::where('idReservasi', $reservasi->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $jadwal = $reservasi->status === 'confirmed'
-            ? Jadwal::where('idReservasi', $reservasi->id)->first()
-            : null;
-
-        $statusMapping = [
-            'pending'   => 'Menunggu Konfirmasi',
-            'confirmed' => 'Sudah Konfirmasi',
-            'process'   => 'Proses Perbaikan',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
-        ];
-
-        return response()->json([
-            'message' => 'Data reservasi ditemukan.',
-            'data' => [
-                'namaLengkap' => $reservasi->namaLengkap,
-                'noTelp' => $reservasi->noTelp,
-                'servis' => $reservasi->servis,
-                'deskripsi' => $reservasi->deskripsi,
-                'status' => $statusMapping[$reservasi->status] ?? $reservasi->status,
-                'riwayat' => $riwayat,
-                'jadwal' => $jadwal ? [
-                    'tanggal' => $jadwal->tanggal,
-                    'waktuMulai' => $jadwal->waktuMulai,
-                    'waktuSelesai' => $jadwal->waktuSelesai,
-                ] : null,
-                'lokasi' => $reservasi->servis === 'Home Service' ? [
-                    'latitude' => $reservasi->pelanggan->latitude ?? null,
-                    'longitude' => $reservasi->pelanggan->longitude ?? null,
-                    'alamat' => $reservasi->alamatLengkap,
-                ] : null,
-            ]
-        ], 200); // OK
     }
 
     // public function showUploadForm()

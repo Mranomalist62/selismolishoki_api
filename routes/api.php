@@ -19,3 +19,8 @@ Route::prefix('/ulasan')->controller( UlasanController::class)->group(function (
     Route::post('/add', 'store'); // POST /api/ulasan/add
     Route::get('/', 'index'); //GET /api/ulasan/fetch
 });
+
+Route::get('/logtest', function () {
+    Log::info('Test log at ' . now());
+    return 'Logged!';
+});
