@@ -26,6 +26,13 @@ class JenisKerusakanResource extends Resource
                 Forms\Components\TextInput::make('nama')
                     ->required()
                     ->maxLength(255),
+
+                Forms\Components\Select::make('parts')
+                    ->label('Parts Terkait')
+                    ->relationship('parts','nama')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 

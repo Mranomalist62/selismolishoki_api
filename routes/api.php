@@ -13,6 +13,7 @@ Route::prefix('reservasi')->controller(PelangganController::class)->group(functi
 
 Route::prefix('jenis-kerusakan')->controller(JenisKerusakanController::class)->group(function () {
     Route::get('/list', 'getJenisKerusakanList'); // GET /api/jenis-kerusakan/list
+    Route::get('/part/{id}','getPartsByJenisKerusakan'); // GET /api/jenis-kerusakan/part/{id}
 });
 
 Route::prefix('/ulasan')->controller( UlasanController::class)->group(function () {

@@ -44,6 +44,54 @@ use Illuminate\Support\Facades\Log;
         }
     }
 
+    public function getPartsByJenisKerusakan($id)
+    {
+        try {
+            $jenisKerusakan = JenisKerusakan::with('parts:id,nama,harga')
+                ->select(['id', 'nama'])
+                ->find($id);
+
+            if (!$jenisKerusakan) {
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Jenis kerusakan tidak ditemukan.',
+                    'data' => []
+                ], 404);
+            }
+
+            $parts = $jenisKerusakan->parts;
+
+            if ($parts->isEmpty()) {
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Tidak ada parts terkait untuk jenis kerusakan ini.',
+                    'data' => []
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $parts
+            ], 200);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database error: ' . $e);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengakses database.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+
+        } catch (\Exception $e) {
+            Log::error('Internal error: ' . $e);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan internal.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
 
 //     public function index()
 //     {

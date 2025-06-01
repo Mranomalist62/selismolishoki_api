@@ -69,4 +69,8 @@ class JenisKerusakan extends Model
         $jenis = self::findOrFail($id);
         return $jenis->delete();
     }
+
+    public function parts(){
+        return $this->belongsToMany(Part::class, 'jenis_kerusakan_parts');
+    }
 }
