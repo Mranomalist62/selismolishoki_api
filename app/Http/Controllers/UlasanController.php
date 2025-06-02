@@ -8,18 +8,21 @@ use Illuminate\Http\Request;
 class UlasanController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $ulasan = Ulasan::latest()->get(); // Optionally ordered by newest
-        return response()->json([
-            'success' => true,
-            'message' => 'List of Ulasan',
-            'data' => $ulasan
-        ], 200);
+        $ulasan = Ulasan::latest()->get();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'List of Ulasan',
+                'data' => $ulasan
+            ], 200);
+        }
+
+        // For web requests, return a view with data (create a Blade view accordingly)
+        return view('ulasan.index', compact('ulasan'));
     }
-
-
-
 
     public function store(Request $request)
     {
@@ -33,21 +36,30 @@ class UlasanController extends Controller
         try {
             $ulasan = (new Ulasan)->createUlasan($validated);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Ulasan berhasil ditambahkan.',
-                'data' => $ulasan,
-            ], 201);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Ulasan berhasil ditambahkan.',
+                    'data' => $ulasan,
+                ], 201);
+            }
+
+            // For web, redirect back with a success message
+            return redirect()->back()->with('success', 'Ulasan berhasil ditambahkan.');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'Terjadi kesalahan saat menambahkan ulasan.',
-                'error' => $e->getMessage(),
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Terjadi kesalahan saat menambahkan ulasan.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+
+            // For web, redirect back with an error message
+            return redirect()->back()->withErrors('Terjadi kesalahan saat menambahkan ulasan.');
         }
     }
-
 //     public function index(Request $request)
 //     {
 //         $query = ulasan::query();

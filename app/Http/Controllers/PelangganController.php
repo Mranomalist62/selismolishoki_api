@@ -15,14 +15,16 @@ use Illuminate\Support\Facades\Log;
 class PelangganController extends Controller
 {
     // Menampilkan form reservasi untuk Home Service
-    // public function create()
-    // {
-    //     $jenisKerusakan = JenisKerusakan::all();
-    //     return view('services.servis', compact('jenisKerusakan'));
-    // }
+    public function create()
+    {
+        $jenisKerusakan = JenisKerusakan::all();
+        return view('services.servis', compact('jenisKerusakan'));
+    }
 
     public function store(Request $request)
     {
+        $isApi = $request->wantsJson() || $request->is('api/*');
+
         try {
             // Validasi input
             $validatedData = $request->validate([
@@ -69,7 +71,7 @@ class PelangganController extends Controller
             $reservasi->save();
 
             // Simpan atau update data pelanggan
-            $pelanggan = Data_Pelanggan::updateOrCreate(
+            Data_Pelanggan::updateOrCreate(
                 ['noHP' => $request->noTelp],
                 [
                     'nama' => $validatedData['namaLengkap'],
@@ -92,36 +94,56 @@ class PelangganController extends Controller
                 'waktuSelesai' => $validatedData['waktuSelesai'],
             ]));
 
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Reservasi berhasil dibuat.',
+                    'data' => [
+                        'no_resi' => $reservasi->noResi,
+                        'reservasi_id' => $reservasi->id
+                    ]
+                ], 201);
+            }
+
             return response()->json([
-                'status' => 'success',
-                'message' => 'Reservasi berhasil dibuat.',
-                'data' => [
-                    'no_resi' => $reservasi->noResi,
-                    'reservasi_id' => $reservasi->id
-                ]
-            ], status: 201); // HTTP 201 Created
+                'success' => true,
+                'message' => 'Reservasi berhasil dibuat!',
+                'no_resi' => $reservasi->noResi,
+            ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error(''. $e);
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'Validasi gagal.',
-                'errors' => $e->errors()
-            ], 422); // HTTP 422 Unprocessable Entity
+            Log::error('Validasi gagal: ' . $e);
+
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Validasi gagal.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return back()->withErrors($e->validator)->withInput();
 
         } catch (\Exception $e) {
-            Log::error(message: ''. $e);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan internal.',
-                'error' => $e->getMessage()
-            ], 500); // HTTP 500 Internal Server Error
+            Log::error('Terjadi kesalahan: ' . $e);
+
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan internal.',
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
+            }
+
+            return back()->with('error', 'Terjadi kesalahan internal.')->withInput();
         }
     }
 
 
     public function storeGarage(Request $request)
     {
+        $isApi = $request->wantsJson() || $request->is('api/*');
+
         try {
             // Validasi input
             $validatedData = $request->validate([
@@ -181,51 +203,74 @@ class PelangganController extends Controller
                 'waktuSelesai' => $validatedData['waktuSelesai'],
             ]));
 
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Reservasi Garage berhasil dibuat.',
+                    'data' => [
+                        'no_resi' => $reservasi->noResi,
+                        'reservasi_id' => $reservasi->id
+                    ]
+                ], 201);
+            }
+
             return response()->json([
-                'status' => 'success',
-                'message' => 'Reservasi Garage berhasil dibuat.',
-                'data' => [
-                    'no_resi' => $reservasi->noResi,
-                    'reservasi_id' => $reservasi->id
-                ]
-            ], 201); // HTTP 201 Created
+                'success' => true,
+                'message' => 'Reservasi berhasil dibuat!',
+                'no_resi' => $reservasi->noResi,
+            ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'Validasi gagal.',
-                'errors' => $e->errors()
-            ], 422);
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'fail',
+                    'message' => 'Validasi gagal.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return back()->withErrors($e->validator)->withInput();
+
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat membuat reservasi Garage.',
-                'error' => $e->getMessage()
-            ], 500);
+            if ($isApi) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Terjadi kesalahan saat membuat reservasi Garage.',
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
+            }
+
+            return back()->with('error', 'Terjadi kesalahan saat membuat reservasi Garage.')->withInput();
         }
     }
 
     // // Menampilkan form reservasi untuk Garage Service
-    // public function createGarage()
-    // {
-    //     $jenisKerusakan = JenisKerusakan::all();
-    //     return view('services.servisgarage', compact('jenisKerusakan'));
-    // }
+    public function createGarage()
+    {
+        $jenisKerusakan = JenisKerusakan::all();
+        return view('services.servisgarage', compact('jenisKerusakan'));
+    }
 
     // public function formCekResi()
     // {
     //     return view('services.cekresi');
     // }
 
-    public function cekResi(Request $request)
+    public function cekResi(Request $request, $noResi = null)
     {
+        $isApi = $request->wantsJson() || $request->is('api/*');
+
+        // Use route param if present, else fallback to query param
+        $noResi = $noResi ?? $request->query('noResi');
+
         Log::info('cekResi called');
+
         try {
-
-            $noResi = $request->query('noResi');
-
             if (!$noResi) {
-                return response()->json(['error' => 'Parameter noResi diperlukan'], 400);
+                if ($isApi) {
+                    return response()->json(['error' => 'Parameter noResi diperlukan'], 400);
+                }
+                return back()->with('error', 'Nomor resi diperlukan.')->withInput();
             }
 
             Log::info("cekResi called with noResi: $noResi");
@@ -234,9 +279,12 @@ class PelangganController extends Controller
 
             if (!$reservasi) {
                 Log::warning('Reservation not found for number: ' . $noResi);
-                return response()->json([
-                    'message' => 'Nomor resi tidak ditemukan.'
-                ], 404);
+                if ($isApi) {
+                    return response()->json([
+                        'message' => 'Nomor resi tidak ditemukan.'
+                    ], 404);
+                }
+                return back()->with('error', 'Nomor resi tidak ditemukan.')->withInput();
             }
 
             $riwayat = Riwayat::where('idReservasi', $reservasi->id)
@@ -255,27 +303,28 @@ class PelangganController extends Controller
                 'cancelled' => 'Dibatalkan',
             ];
 
-            $response = [
-                'message' => 'Data reservasi ditemukan.',
-                'data' => [
-                    'namaLengkap' => $reservasi->namaLengkap,
-                    'noTelp' => $reservasi->noTelp,
-                    'servis' => $reservasi->servis,
-                    'deskripsi' => $reservasi->deskripsi,
-                    'status' => $statusMapping[$reservasi->status] ?? $reservasi->status,
-                    'riwayat' => $riwayat,
-                    'tanggal' => $jadwal?->tanggal,
-                    'waktuMulai' => $jadwal?->waktuMulai,
-                    'waktuSelesai' => $jadwal?->waktuSelesai,
-                    'latitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->latitude ?? null : null,
-                    'longitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->longitude ?? null : null,
-                    'alamat' => $reservasi->servis === 'Home Service' ? $reservasi->alamatLengkap : null,
-                ]
+            $data = [
+                'namaLengkap' => $reservasi->namaLengkap,
+                'noTelp' => $reservasi->noTelp,
+                'servis' => $reservasi->servis,
+                'deskripsi' => $reservasi->deskripsi,
+                'status' => $statusMapping[$reservasi->status] ?? $reservasi->status,
+                'riwayat' => $riwayat,
+                'tanggal' => $jadwal?->tanggal,
+                'waktuMulai' => $jadwal?->waktuMulai,
+                'waktuSelesai' => $jadwal?->waktuSelesai,
+                'latitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->latitude ?? null : null,
+                'longitude' => $reservasi->servis === 'Home Service' ? $reservasi->pelanggan->longitude ?? null : null,
+                'alamat' => $reservasi->servis === 'Home Service' ? $reservasi->alamatLengkap : null,
             ];
 
             Log::info('Reservation data retrieved successfully for: ' . $noResi);
 
-            return response()->json($response, 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Data reservasi ditemukan.',
+                'data' => $data
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Error while checking reservation: ' . $e->getMessage(), [
@@ -284,16 +333,20 @@ class PelangganController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat memproses permintaan.',
-            ], 500);
+            if ($isApi) {
+                return response()->json([
+                    'message' => 'Terjadi kesalahan saat memproses permintaan.',
+                ], 500);
+            }
+
+            return back()->with('error', 'Terjadi kesalahan saat memproses permintaan.');
         }
     }
 
-    // public function showUploadForm()
-    // {
-    //     return view('services.upload_video');
-    // }
+    public function showUploadForm()
+    {
+        return view('services.upload_video');
+    }
 
     public function upload(Request $request)
     {
@@ -325,39 +378,6 @@ class PelangganController extends Controller
     // {
     //     return view('services.tambahulasan');
     // }
-
-    public function tambahUlasan(Request $request)
-    {
-        $validatedData = $request->validate([
-            'noResi' => 'required|string|exists:reservasis,noResi',
-            'noTelp' => 'required|string',
-            'ulasan' => 'required|string|max:1000',
-            'rating' => 'required|integer|between:1,5',
-        ]);
-
-        $reservasi = Reservasi::where('noResi', $validatedData['noResi'])
-            ->where('noTelp', $validatedData['noTelp'])
-            ->first();
-
-        if (!$reservasi) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Nomor resi dan nomor telepon tidak cocok.'
-            ]);
-        }
-
-        ulasan::create([
-            'nama' => $reservasi->namaLengkap,
-            'ulasan' => $validatedData['ulasan'],
-            'rating' => $validatedData['rating'],
-            'id_pelanggan' => $reservasi->pelanggan->id // Tambahkan relasi ke pelanggan
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Ulasan berhasil disimpan.'
-        ]);
-    }
 
     public function tambahRequestJadwal(Request $request)
     {
