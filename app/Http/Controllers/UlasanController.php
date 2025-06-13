@@ -20,8 +20,8 @@ class UlasanController extends Controller
             ], 200);
         }
 
-        // For web requests, return a view with data (create a Blade view accordingly)
-        return view('ulasan.index', compact('ulasan'));
+        // // For web requests, return a view with data (create a Blade view accordingly)
+        // return view('ulasan.index', compact('ulasan'));
     }
 
     public function store(Request $request)
